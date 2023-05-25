@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>学习attribute变量</title>
+    <script src="../lib/index.js"></script>
+  </head>
+  <body>
+    <canvas id="canvas" width="400" height="400">此浏览器不支持canvas</canvas>
+  </body>
+</html>
+<script>
+  const ctx = document.getElementById("canvas");
+  const gl = ctx.getContext("webgl");
+
+  // 着色器
+  // 创建着色器源码
+  const VERTEX_SHADER_SOURCE = `
+    attribute vec4 aPosition;
+    // 必须存在 main 函数，入口函数
+    void main() {
+      // 绘制点的坐标
+      gl_Position = aPosition;
+      // 点的大小
+      gl_PointSize = 30.0;
+    }
+  `; // 顶点着色器
+  // gl_Position vec4(0.0, 0.0, 0.0, 1.0)   x, y, z, w:齐次坐标 (x/w, y/w, z/w)
+  // gl_FragColor  vec4(1.0, 0.0, 0.0, 1.0)   r, g, b, a
+  const FRAGMENT_SHADER_SOURCE = `
+    void main() {
+      gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
+    }
+  `; // 片元着色器
+
+  // 创建着色器
+  const program = initShader(gl, VERTEX_SHADER_SOURCE, FRAGMENT_SHADER_SOURCE);
+
+  const aPosition = gl.getAttribLocation(program, "aPosition");
+  // gl.vertexAttrib4f(aPosition, 0.5, 0.5, 0.0, 1.0);
+  // gl.vertexAttrib3f(aPosition, 0.5, 0.5, 0.0);
+  // gl.vertexAttrib2f(aPosition, 0.5, 0.5);
+  // gl.vertexAttrib1f(aPosition, 0.5);
+
+  // 执行绘制
+  // args: 要绘制的图形，从哪个开始，使用几个顶点
+  // gl.drawArrays(gl.POINTS, 0, 1);
+
+  let x = 0;
+  setInterval(() => {
+    x += 0.1;
+    if (x > 1.0) {
+      x = 0;
+    }
+    gl.vertexAttrib1f(aPosition, x);
+    // 执行绘制
+    gl.drawArrays(gl.POINTS, 0, 1);
+  }, 200);
+</script>

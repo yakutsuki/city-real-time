@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>使用varying变量-绘制彩色三角形</title>
+    <script src="../lib/index.js"></script>
+    <style>
+      * {
+        padding: 0;
+        margin: 0;
+      }
+
+      canvas {
+        margin: 50px auto 0;
+        display: block;
+        background-color: yellow;
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="canvas" width="400" height="400">此浏览器不支持canvas</canvas>
+  </body>
+</html>
+<script>
+  const ctx = document.getElementById("canvas");
+  /***
+   * @type {WebGLRenderingContext} gl
+   * */
+  const gl = ctx.getContext("webgl");
+
+  // 着色器
+  // 创建着色器源码
+  // uniform 针对所有顶点有效
+  const VERTEX_SHADER_SOURCE = `
+    attribute vec4 aPosition;
+
+    varying vec4 vColor;
+
+    // 必须存在 main 函数，入口函数
+    void main() {
+      vColor = aPosition;
+
+      // 绘制点的坐标
+      gl_Position = aPosition;
+    }
+  `; // 顶点着色器
+  // gl_Position vec4(0.0, 0.0, 0.0, 1.0)   x, y, z, w:齐次坐标 (x/w, y/w, z/w)
+  // gl_FragColor  vec4(1.0, 0.0, 0.0, 1.0)   r, g, b, a
+  // 高精度 highp   低精度 lowp   中精度 mediump
+  const FRAGMENT_SHADER_SOURCE = `
+    precision lowp float;
+    varying vec4 vColor;
+
+    void main() {
+      gl_FragColor = vColor;
+    }
+  `; // 片元着色器
+
+  // 创建着色器
+  const program = initShader(gl, VERTEX_SHADER_SOURCE, FRAGMENT_SHADER_SOURCE);
+
+  const aPosition = gl.getAttribLocation(program, "aPosition");
+
+  // prettier-ignore
+  const points = new Float32Array([
+    -0.5, -0.5, 
+    0.5, -0.5, 
+    0.0, 0.5,
+  ]);
+
+  // 创建缓冲区对象
+  const buffer = gl.createBuffer();
+  // 绑定缓冲区对象
+  // gl.ARRAY_BUFFER: 包含顶点属性的 Buffer，如顶点坐标，纹理坐标数据或顶点颜色数据。
+  // gl.ELEMENT_ARRAY_BUFFER: 用于元素索引的 Buffer。
+  gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+  // 向缓冲区对象写入数据
+  // gl.STATIC_DRAW: 缓冲区的内容可能经常使用，而不会经常更改。内容被写入缓冲区，但不被读取。(写入一次，多次绘制)
+  gl.bufferData(gl.ARRAY_BUFFER, points, gl.STATIC_DRAW);
+  // 将缓冲区对象分配给一个 attribute 变量
+  gl.vertexAttribPointer(aPosition, 2, gl.FLOAT, false, 0, 0);
+  // 开启顶点属性
+  gl.enableVertexAttribArray(aPosition);
+
+  // 执行绘制
+  gl.drawArrays(gl.TRIANGLES, 0, 3);
+</script>

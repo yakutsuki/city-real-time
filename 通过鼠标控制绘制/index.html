@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>通过鼠标控制绘制</title>
+    <script src="../lib/index.js"></script>
+    <style>
+      * {
+        padding: 0;
+        margin: 0;
+      }
+
+      canvas {
+        margin: 50px auto 0;
+        display: block;
+        background-color: yellow;
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="canvas" width="400" height="400">此浏览器不支持canvas</canvas>
+  </body>
+</html>
+<script>
+  const ctx = document.getElementById("canvas");
+  const gl = ctx.getContext("webgl");
+
+  // 着色器
+  // 创建着色器源码
+  const VERTEX_SHADER_SOURCE = `
+    attribute vec4 aPosition;
+    // 必须存在 main 函数，入口函数
+    void main() {
+      // 绘制点的坐标
+      gl_Position = aPosition;
+      // 点的大小
+      gl_PointSize = 10.0;
+    }
+  `; // 顶点着色器
+  // gl_Position vec4(0.0, 0.0, 0.0, 1.0)   x, y, z, w:齐次坐标 (x/w, y/w, z/w)
+  // gl_FragColor  vec4(1.0, 0.0, 0.0, 1.0)   r, g, b, a
+  const FRAGMENT_SHADER_SOURCE = `
+    void main() {
+      gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
+    }
+  `; // 片元着色器
+
+  // 创建着色器
+  const program = initShader(gl, VERTEX_SHADER_SOURCE, FRAGMENT_SHADER_SOURCE);
+
+  const aPosition = gl.getAttribLocation(program, "aPosition");
+
+  const points = [];
+  ctx.onclick = function (e) {
+    // 坐标
+    const x = e.clientX;
+    const y = e.clientY;
+
+    const domPosition = e.target.getBoundingClientRect();
+
+    const domX = x - domPosition.left;
+    const domY = y - domPosition.top;
+
+    // 转换成 webgl 坐标系
+    const webglX = (domX / ctx.width) * 2 - 1;
+    const webglY = 1 - (domY / ctx.height) * 2;
+
+    // console.log(webglX, webglY);
+
+    points.push({ webglX, webglY });
+
+    for (let i = 0; i < points.length; i++) {
+      gl.vertexAttrib2f(aPosition, points[i].webglX, points[i].webglY);
+      // 执行绘制
+      // args: 要绘制的图形，从哪个开始，使用几个顶点
+      gl.drawArrays(gl.POINTS, 0, 1);
+    }
+  };
+</script>
