@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>图像添加背景图</title>
+    <title>3d基础</title>
     <script src="../lib/index.js"></script>
     <style>
       * {
@@ -34,31 +34,22 @@
   // 创建着色器源码
   // uniform 针对所有顶点有效
   const VERTEX_SHADER_SOURCE = `
-    // 只传递顶点数据
     attribute vec4 aPosition;
-
-    attribute vec4 aTex;
-
-    varying vec2 vTex;
-
+    uniform mat4 mat;
     // 必须存在 main 函数，入口函数
     void main() {
       // 绘制点的坐标
-      gl_Position = aPosition;
-      vTex = vec2(aTex.x, aTex.y);
+      gl_Position = mat * aPosition;
+      // 点的大小
+      gl_PointSize = 10.0;
     }
   `; // 顶点着色器
   // gl_Position vec4(0.0, 0.0, 0.0, 1.0)   x, y, z, w:齐次坐标 (x/w, y/w, z/w)
   // gl_FragColor  vec4(1.0, 0.0, 0.0, 1.0)   r, g, b, a
   // 高精度 highp   低精度 lowp   中精度 mediump
   const FRAGMENT_SHADER_SOURCE = `
-    precision lowp float;
-    uniform sampler2D uSampler;
-    varying vec2 vTex;
-
     void main() {
-      // 第二个参数，纹理坐标
-      gl_FragColor = texture2D(uSampler, vTex);
+      gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
     }
   `; // 片元着色器
 
@@ -66,20 +57,27 @@
   const program = initShader(gl, VERTEX_SHADER_SOURCE, FRAGMENT_SHADER_SOURCE);
 
   const aPosition = gl.getAttribLocation(program, "aPosition");
-  const aTex = gl.getAttribLocation(program, "aTex");
-  const uSampler = gl.getUniformLocation(program, "uSampler");
+  const mat = gl.getUniformLocation(program, "mat");
+
+  function getTranslateMatrix(x = 0, y = 0, z = 0) {
+    // prettier-ignore
+    return new Float32Array([
+      1.0, 0.0, 0.0, 0.0,
+      0.0, 1.0, 0.0, 0.0,
+      0.0, 0.0, 1.0, 0.0,
+      x, y, z, 1.0,
+    ]);
+  }
 
   // prettier-ignore
   const points = new Float32Array([
-    -0.5, 0.5, 0.0, 1.0,
-    -0.5, -0.5, 0.0, 0.0,
-    0.5, 0.5, 1.0, 1.0,
-    0.5, -0.5, 1.0, 0.0
+    -0.5, -0.5, 
+    0.5, -0.5, 
+    0.0, 0.5,
   ]);
 
   // 创建缓冲区对象
   const buffer = gl.createBuffer();
-  const BYTES = points.BYTES_PER_ELEMENT;
   // 绑定缓冲区对象
   // gl.ARRAY_BUFFER: 包含顶点属性的 Buffer，如顶点坐标，纹理坐标数据或顶点颜色数据。
   // gl.ELEMENT_ARRAY_BUFFER: 用于元素索引的 Buffer。
@@ -88,47 +86,26 @@
   // gl.STATIC_DRAW: 缓冲区的内容可能经常使用，而不会经常更改。内容被写入缓冲区，但不被读取。(写入一次，多次绘制)
   gl.bufferData(gl.ARRAY_BUFFER, points, gl.STATIC_DRAW);
   // 将缓冲区对象分配给一个 attribute 变量
-  // stride: 以字节为单位指定连续顶点属性开始之间的偏移量 (即数组中一行长度)
-  gl.vertexAttribPointer(aPosition, 2, gl.FLOAT, false, BYTES * 4, 0);
+  gl.vertexAttribPointer(aPosition, 2, gl.FLOAT, false, 0, 0);
   // 开启顶点属性
   gl.enableVertexAttribArray(aPosition);
 
-  gl.vertexAttribPointer(aTex, 2, gl.FLOAT, false, BYTES * 4, BYTES * 2);
-  gl.enableVertexAttribArray(aTex);
+  let x = -0.1;
+  function animation() {
+    x += 0.01;
+    if (x > 1) {
+      x = -0.1;
+    }
 
-  const img = new Image();
-  img.onload = function () {
-    // 创建纹理对象
-    const texture = gl.createTexture();
+    // const matrix = getTranslateMatrix(x, x);
+    const vm = getViewMatrix(0.0, x, 0.2, 0.0, 0.0, 0.0, 0.0, 0.6, 0.0);
+    // transpose： 在webgl中为false
+    gl.uniformMatrix4fv(mat, false, vm);
+    // 执行绘制
+    gl.drawArrays(gl.TRIANGLES, 0, 3);
 
-    // 反转Y轴
-    // 将图像坐标反转，因为 WebGL 纹理坐标与 CSS 和 Canvas 图像坐标不同，Y 轴相反
-    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 1);
+    requestAnimationFrame(animation);
+  }
 
-    // 开启纹理单元，每个纹理单元管理一个纹理对象
-    gl.activeTexture(gl.TEXTURE0);
-
-    // 绑定纹理对象
-    gl.bindTexture(gl.TEXTURE_2D, texture);
-
-    // 配置纹理参数
-    // gl.TEXTURE_MIN_FILTER: 缩小过滤器
-    // gl.LINEAR: 线性过滤
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-
-    // 处理横向、纵向、平铺的方式
-    // gl.CLAMP_TO_EDGE: 纹理坐标超出纹理范围时，取边缘值
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-
-    // 配置纹理图像
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, img);
-    // 第二个参数，用于开启的纹理编号
-    gl.uniform1i(uSampler, 0);
-
-    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
-  };
-
-  img.src = "../assets/content.png";
+  animation();
 </script>
