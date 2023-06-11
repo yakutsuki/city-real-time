@@ -1,9 +1,12 @@
 lockfileVersion: '6.0'
 
 dependencies:
+  '@tweenjs/tween.js':
+    specifier: ^18.6.4
+    version: 18.6.4
   three:
-    specifier: ^0.153.0
-    version: 0.153.0
+    specifier: ^0.146.0
+    version: 0.146.0
   vue:
     specifier: ^3.2.47
     version: 3.2.47
@@ -239,6 +242,10 @@ packages:
     dev: true
     optional: true
 
+  /@tweenjs/tween.js@18.6.4:
+    resolution: {integrity: sha512-lB9lMjuqjtuJrx7/kOkqQBtllspPIN+96OvTCeJ2j5FEzinoAXTdAMFnDAQT1KVPRlnYfBrqxtqP66vDM40xxQ==}
+    dev: false
+
   /@vitejs/plugin-vue@4.1.0(vite@4.3.9)(vue@3.2.47):
     resolution: {integrity: sha512-++9JOAFdcXI3lyer9UKUV4rfoQ3T1RN8yDqoCLar86s0xQct5yblxAE+yWgRnU5/0FOlVCpTZpYSBV/bGWrSrQ==}
     engines: {node: ^14.18.0 || >=16.0.0}
@@ -408,8 +415,8 @@ packages:
     resolution: {integrity: sha512-9NykojV5Uih4lgo5So5dtw+f0JgJX30KCNI8gwhz2J9A15wD0Ml6tjHKwf6fTSa6fAdVBdZeNOs9eJ71qCk8vA==}
     deprecated: Please use @jridgewell/sourcemap-codec instead
 
-  /three@0.153.0:
-    resolution: {integrity: sha512-OCP2/uQR6GcDpSLnJt/3a4mdS0kNWcbfUXIwLoEMgLzEUIVIYsSDwskpmOii/AkDM+BBwrl6+CKgrjX9+E2aWg==}
+  /three@0.146.0:
+    resolution: {integrity: sha512-1lvNfLezN6OJ9NaFAhfX4sm5e9YCzHtaRgZ1+B4C+Hv6TibRMsuBAM5/wVKzxjpYIlMymvgsHEFrrigEfXnb2A==}
     dev: false
 
   /to-fast-properties@2.0.0:
