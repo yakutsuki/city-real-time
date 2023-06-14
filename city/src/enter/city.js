@@ -13,6 +13,7 @@ import { Road } from "../effect/road";
 import { Font } from "../effect/font";
 import { Snow } from "../effect/snow";
 import { Rain } from "../effect/rain";
+import { Smoke } from "../effect/smoke";
 
 export class City {
   constructor(scene, camera, controls) {
@@ -74,6 +75,8 @@ export class City {
     this.effect.snow = new Snow(this.scene);
 
     this.effect.rain = new Rain(this.scene);
+
+    this.effect.smoke = new Smoke(this.scene);
 
     // 添加点击选择
     this.addClick();
