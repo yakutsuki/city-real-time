@@ -15,9 +15,10 @@ import { Snow } from "../effect/snow";
 import { Rain } from "../effect/rain";
 
 export class City {
-  constructor(scene, camera) {
+  constructor(scene, camera, controls) {
     this.scene = scene;
     this.camera = camera;
+    this.controls = controls;
     this.tweenPosition = null;
     this.tweenRotation = null;
 
@@ -76,6 +77,41 @@ export class City {
 
     // 添加点击选择
     this.addClick();
+
+    this.addWheel();
+  }
+  // 让场景跟着鼠标的坐标进行缩放
+  addWheel() {
+    const body = document.body;
+    body.onmousewheel = (event) => {
+      const value = 30;
+      // 获取鼠标坐标
+      const x = (event.clientX / window.innerWidth) * 2 - 1;
+      const y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+      const vector = new THREE.Vector3(x, y, 0.5);
+
+      vector.unproject(this.camera);
+      vector.sub(this.camera.position).normalize();
+
+      if (event.wheelDelta > 0) {
+        this.camera.position.x += vector.x * value;
+        this.camera.position.y += vector.y * value;
+        this.camera.position.z += vector.z * value;
+
+        this.controls.target.x += vector.x * value;
+        this.controls.target.y += vector.y * value;
+        this.controls.target.z += vector.z * value;
+      } else {
+        this.camera.position.x -= vector.x * value;
+        this.camera.position.y -= vector.y * value;
+        this.camera.position.z -= vector.z * value;
+
+        this.controls.target.x -= vector.x * value;
+        this.controls.target.y -= vector.y * value;
+        this.controls.target.z -= vector.z * value;
+      }
+    };
   }
 
   addClick() {

@@ -24,7 +24,7 @@ export const initCity = () => {
   // 是否有惯性
   controls.enableDamping = true;
   // 是否可以缩放
-  controls.enableZoom = true;
+  controls.enableZoom = false;
   // 最近和最远距离
   controls.minDistance = 100;
   controls.maxDistance = 2000;
@@ -45,7 +45,7 @@ export const initCity = () => {
   // 设置场景色
   renderer.setClearColor(new THREE.Color(0x000000), 1);
 
-  const city = new City(scene, camera);
+  const city = new City(scene, camera, controls);
 
   const clock = new THREE.Clock();
 
