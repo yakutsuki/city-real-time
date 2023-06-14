@@ -9,6 +9,10 @@ import { Circle } from "../effect/circle";
 import { Ball } from "../effect/ball";
 import { Cone } from "../effect/cone";
 import { Fly } from "../effect/fly";
+import { Road } from "../effect/road";
+import { Font } from "../effect/font";
+import { Snow } from "../effect/snow";
+import { Rain } from "../effect/rain";
 
 export class City {
   constructor(scene, camera) {
@@ -29,6 +33,8 @@ export class City {
     this.time = {
       value: 0,
     };
+
+    this.effect = {};
 
     this.loadCity();
   }
@@ -59,6 +65,14 @@ export class City {
     new Cone(this.scene, this.top, this.height);
 
     new Fly(this.scene, this.time);
+
+    new Road(this.scene, this.time);
+
+    new Font(this.scene);
+
+    this.effect.snow = new Snow(this.scene);
+
+    this.effect.rain = new Rain(this.scene);
 
     // 添加点击选择
     this.addClick();
@@ -138,6 +152,10 @@ export class City {
   }
 
   start(delta) {
+    for (const key in this.effect) {
+      this.effect[key] && this.effect[key].animation();
+    }
+
     this.tweenPosition && this.tweenPosition.update();
     this.tweenRotation && this.tweenRotation.update();
 
